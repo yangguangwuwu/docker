@@ -16,8 +16,6 @@ services:
     build: ./php-fpm
     restart: always
     container_name: thinkcmf-php-fpm
-    ports:
-      - "9000:9000"
     volumes:
       - ./www/:/var/www/html/:rw
       - ./php/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
@@ -26,15 +24,11 @@ services:
   mysql:
     image: mysql:5.7 
     restart: always
-    ports:
-      - "3306:3306"
     container_name: thinkcmf-mysql
     volumes:
       - ./mysql/data/:/var/lib/mysql/
     environment:
       - MYSQL_ROOT_PASSWORD=thinkcmf
-      - MYSQL_USER=thinkcmf
-      - MYSQL_PASSWORD=thinkcmf
     networks:
       - web
   redis:
@@ -42,23 +36,15 @@ services:
     restart: always
     container_name: thinkcmf-redis
     volumes:
-      - ./redis/config:/docker/config
       - ./redis/data:/data
-    command: redis-server /docker/config/redis.conf
-    ports:
-      - 6379:6379
     networks:
       - web
-  mysql-manage:
+  adminer:
     image: adminer
+    container_name: thinkcmf-mysql-manage
     environment:
-      - TZ=Asia/Shanghai
-      - PMA_ARBITRARY=1
-      - MYSQL_USER=thinkcmf
-      - MYSQL_PASSWORD=thinkcmf
-      - MYSQL_ROOT_PASSWORD=thinkcmf
-      - PMA_HOST=mysql
-      - PMA_PORT=3306
+      - ADMINER_DEFAULT_SERVER=mysql
+      - ADMINER_DEFAULT_USER=thinkcmf
     ports:
       - "1000:8080"                         # 设置容器80端口映射指定宿主机端口，用于宿主机访问可视化web
     depends_on:                                           # 依赖容器
@@ -67,17 +53,17 @@ services:
       - web
     restart: always
 
-  redis-manage:
-    build:
-      context: ./redis-manage
+  phpredisadmin:
+    image: erikdubbelboer/phpredisadmin
+    container_name: thinkcmf-redis-manage
     environment:
       - TZ=Asia/Shanghai
       - REDIS_1_HOST=redis
       - REDIS_1_PORT=6379
     ports:
-      - "2000:80"                     # 设置容器80端口映射指定宿主机端口，用于宿主机访问可视化web
-    depends_on:                                       # 依赖容器
-      - redis                                         # 在 Redis 服务容器启动后启动
+      - "2000:80"
+    depends_on:
+      - redis
     networks:
       - web
     restart: always
