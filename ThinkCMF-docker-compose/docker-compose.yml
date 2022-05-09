@@ -49,6 +49,38 @@ services:
       - 6379:6379
     networks:
       - web
+  mysql-manage:
+    image: adminer
+    environment:
+      - TZ=Asia/Shanghai
+      - PMA_ARBITRARY=1
+      - MYSQL_USER=thinkcmf
+      - MYSQL_PASSWORD=thinkcmf
+      - MYSQL_ROOT_PASSWORD=thinkcmf
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    ports:
+      - "1000:8080"                         # 设置容器80端口映射指定宿主机端口，用于宿主机访问可视化web
+    depends_on:                                           # 依赖容器
+      - mysql                                             # 在 Mysql 服务容器启动后启动
+    networks:
+      - web
+    restart: always
+
+  redis-manage:
+    build:
+      context: ./redis-manage
+    environment:
+      - TZ=Asia/Shanghai
+      - REDIS_1_HOST=redis
+      - REDIS_1_PORT=6379
+    ports:
+      - "2000:80"                     # 设置容器80端口映射指定宿主机端口，用于宿主机访问可视化web
+    depends_on:                                       # 依赖容器
+      - redis                                         # 在 Redis 服务容器启动后启动
+    networks:
+      - web
+    restart: always
 networks:
   web:
 
